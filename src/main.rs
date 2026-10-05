@@ -1,6 +1,6 @@
 fn main() {
-    let image_width: u64 = 256;
-    let image_height: u64 = 256;
+    let image_width = 256i32;
+    let image_height = 256i32;
 
     println!("P3");
     println!("{} {}", image_width, image_height);
@@ -12,9 +12,9 @@ fn main() {
             let g = j as f64 / (image_height - 1) as f64;
             let b = 0f64;
 
-            let int_r: u64 = (255.999 * r) as u64;
-            let int_g: u64 = (255.999 * g) as u64;
-            let int_b: u64 = (255.999 * b) as u64;
+            let int_r = (255.999 * r) as u64;
+            let int_g = (255.999 * g) as u64;
+            let int_b = (255.999 * b) as u64;
 
             println!("{} {} {}", int_r, int_g, int_b);
         }
