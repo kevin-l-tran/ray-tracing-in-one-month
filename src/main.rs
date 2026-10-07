@@ -4,6 +4,7 @@ use std::io::Write;
 use crate::color::{Color, write_color};
 
 mod color;
+mod ray;
 mod vec3;
 
 fn main() -> io::Result<()> {
