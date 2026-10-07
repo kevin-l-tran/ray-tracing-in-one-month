@@ -1,9 +1,12 @@
 use std::io;
 use std::io::Write;
 
+use crate::color::{Color, write_color};
+
+mod color;
 mod vec3;
 
-fn main() {
+fn main() -> io::Result<()> {
     let image_width = 256i32;
     let image_height = 256i32;
 
@@ -11,20 +14,23 @@ fn main() {
     println!("{} {}", image_width, image_height);
     println!("255");
 
+    let stdout = io::stdout();
+    let mut out = stdout.lock();
+
     for j in 0..image_height {
         eprint!("\rScanlines remaining: {} ", image_height - j);
         io::stderr().flush().expect("failed to flush");
 
         for i in 0..image_width {
-            let r = i as f64 / (image_width - 1) as f64;
-            let g = j as f64 / (image_height - 1) as f64;
-            let b = 0f64;
+            let pixel_color = Color {
+                r: i as f64 / (image_width - 1) as f64,
+                g: j as f64 / (image_height - 1) as f64,
+                b: 0.0,
+            };
 
-            let int_r = (255.999 * r) as u64;
-            let int_g = (255.999 * g) as u64;
-            let int_b = (255.999 * b) as u64;
-
-            println!("{} {} {}", int_r, int_g, int_b);
+            write_color(&mut out, &pixel_color)?;
         }
     }
+
+    Ok(())
 }
