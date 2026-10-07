@@ -4,19 +4,18 @@ use std::io::Write;
 use crate::{
     color::{Color, write_color},
     ray::Ray,
-    vec3::{Point3, Vec3},
+    vec3::{Point3, Vec3, unit_vector},
 };
 
 mod color;
 mod ray;
 mod vec3;
 
-fn ray_color(_: &Ray) -> Color {
-    Color {
-        r: 0.0,
-        g: 0.0,
-        b: 0.0,
-    }
+fn ray_color(r: &Ray) -> Color {
+    let unit_direction = unit_vector(r.direction);
+    let a = 0.5 * (unit_direction.y + 1.0);
+
+    (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
 }
 
 fn main() -> io::Result<()> {

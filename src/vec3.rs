@@ -13,7 +13,7 @@ impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
-    
+
     pub fn length_squared(&self) -> f64 {
         self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
     }
@@ -149,4 +149,8 @@ pub fn cross(v1: Vec3, v2: Vec3) -> Vec3 {
         y: v1.z * v2.x - v1.x * v2.z,
         z: v1.x * v2.y - v1.y * v2.x,
     }
+}
+
+pub fn unit_vector(v: Vec3) -> Vec3 {
+    v.normalize()
 }
