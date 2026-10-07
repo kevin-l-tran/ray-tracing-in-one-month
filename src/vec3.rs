@@ -117,7 +117,7 @@ impl Div<f64> for Vec3 {
     type Output = Self;
 
     fn div(self, num: f64) -> Self {
-        assert!(num > 0.0, "cannot divide by 0");
+        assert!(num != 0.0, "cannot divide by 0");
 
         Self {
             x: self.x / num,
@@ -129,7 +129,7 @@ impl Div<f64> for Vec3 {
 
 impl DivAssign<f64> for Vec3 {
     fn div_assign(&mut self, num: f64) {
-        assert!(num > 0.0, "cannot divide by 0");
+        assert!(num != 0.0, "cannot divide by 0");
 
         *self = Self {
             x: self.x / num,
@@ -140,7 +140,7 @@ impl DivAssign<f64> for Vec3 {
 }
 
 pub fn dot(v1: Vec3, v2: Vec3) -> f64 {
-    v1.x * v2.x + v1.y + v2.y + v1.z + v2.z
+    v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
 }
 
 pub fn cross(v1: Vec3, v2: Vec3) -> Vec3 {
