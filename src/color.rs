@@ -109,9 +109,21 @@ impl From<Vec3> for Color {
 pub fn write_color<W: Write>(out: &mut W, pixel_color: &Color) -> io::Result<()> {
     let intensity = Interval::new(0.0, 0.9999999999999999);
 
-    let rbyte = (255.0 * intensity.clamp(pixel_color.r)) as u8;
-    let gbyte = (255.0 * intensity.clamp(pixel_color.g)) as u8;
-    let bbyte = (255.0 * intensity.clamp(pixel_color.b)) as u8;
+    let r = linear_to_gamma(pixel_color.r);
+    let g = linear_to_gamma(pixel_color.g);
+    let b = linear_to_gamma(pixel_color.b);
+
+    let rbyte = (255.0 * intensity.clamp(r)) as u8;
+    let gbyte = (255.0 * intensity.clamp(g)) as u8;
+    let bbyte = (255.0 * intensity.clamp(b)) as u8;
 
     writeln!(out, "{} {} {}", rbyte, gbyte, bbyte)
+}
+
+fn linear_to_gamma(linear_component: f64) -> f64 {
+    if linear_component > 0.0 {
+        return linear_component.sqrt();
+    }
+
+    0.0
 }
