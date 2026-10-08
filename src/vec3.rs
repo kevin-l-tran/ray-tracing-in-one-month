@@ -14,6 +14,41 @@ impl Vec3 {
         Self { x, y, z }
     }
 
+    pub fn random(min: f64, max: f64) -> Self {
+        Self {
+            x: rand::random_range(min..=max),
+            y: rand::random_range(min..=max),
+            z: rand::random_range(min..=max),
+        }
+    }
+
+    pub fn random_normal() -> Self {
+        Self {
+            x: rand::random_range(0.0..=1.0),
+            y: rand::random_range(0.0..=1.0),
+            z: rand::random_range(0.0..=1.0),
+        }
+    }
+
+    pub fn random_unit() -> Self {
+        loop {
+            let p = Vec3::random(-1.0, 1.0);
+            let lensq = p.length_squared();
+            if 1e-160 < lensq && lensq <= 1.0 {
+                return p / lensq.sqrt();
+            }
+        }
+    }
+
+    pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
+        let on_unit_sphere = Vec3::random_unit();
+        if dot(on_unit_sphere, normal) > 0.0 {
+            on_unit_sphere
+        } else {
+            -1.0 * on_unit_sphere
+        }
+    }
+
     pub fn length_squared(&self) -> f64 {
         self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
     }

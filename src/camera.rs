@@ -4,7 +4,7 @@ use crate::{
     color::{Color, write_color},
     hittable::{HitRecord, Hittable},
     interval::Interval,
-    ray::{self, Ray},
+    ray::Ray,
     vec3::{Point3, Vec3, unit_vector},
 };
 
@@ -12,6 +12,7 @@ pub struct Camera {
     pub aspect_ratio: f64,      // ratio of image height over width
     pub image_width: u32,       // rendered image width in pixel count
     pub samples_per_pixel: u32, // number of random samples per pixel
+    pub max_depth: u32,         // max number of ray bounces into scene
 
     image_height: u32,        // rendered image height
     center: Point3,           // camera center
@@ -21,10 +22,24 @@ pub struct Camera {
     pixel_samples_scale: f64, // color scale factor for a sum of pixel samples
 }
 
-fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
+fn ray_color(r: &Ray, depth: u32, world: &dyn Hittable) -> Color {
+    if depth <= 0 {
+        return Color::new(0.0, 0.0, 0.0);
+    }
+
     let mut record = HitRecord::default();
+
     if world.hit(r, Interval::new(0.0, f64::INFINITY), &mut record) {
-        return 0.5 * (Color::from(record.normal) + Color::new(1.0, 1.0, 1.0));
+        let direction = Vec3::random_on_hemisphere(record.normal);
+        return 0.5
+            * ray_color(
+                &Ray {
+                    origin: record.p,
+                    direction,
+                },
+                depth - 1,
+                world,
+            );
     }
 
     let unit_direction = unit_vector(r.direction);
@@ -43,7 +58,12 @@ fn sample_square() -> Vec3 {
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: u32, samples_per_pixel: u32) -> Self {
+    pub fn new(
+        aspect_ratio: f64,
+        image_width: u32,
+        samples_per_pixel: u32,
+        max_depth: u32,
+    ) -> Self {
         let raw_image_height = (image_width as f64 / aspect_ratio) as u32;
         let image_height = if raw_image_height > 1 {
             raw_image_height
@@ -77,6 +97,7 @@ impl Camera {
             aspect_ratio,
             image_width,
             samples_per_pixel,
+            max_depth,
             image_height,
             center,
             pixel00_loc,
@@ -103,7 +124,7 @@ impl Camera {
 
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
-                    pixel_color += ray_color(&r, world);
+                    pixel_color += ray_color(&r, self.max_depth, world);
                 }
 
                 write_color(&mut out, &(self.pixel_samples_scale * pixel_color))?;
