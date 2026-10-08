@@ -4,19 +4,21 @@ use crate::{
     color::{Color, write_color},
     hittable::{HitRecord, Hittable},
     interval::Interval,
-    ray::Ray,
+    ray::{self, Ray},
     vec3::{Point3, Vec3, unit_vector},
 };
 
 pub struct Camera {
-    pub aspect_ratio: f64, // ratio of image height over width
-    pub image_width: u32,  // rendered image width in pixel count
+    pub aspect_ratio: f64,      // ratio of image height over width
+    pub image_width: u32,       // rendered image width in pixel count
+    pub samples_per_pixel: u32, // number of random samples per pixel
 
-    image_height: u32,   // rendered image height
-    center: Point3,      // camera center
-    pixel00_loc: Point3, // location of pixel (0,0)
-    pixel_delta_u: Vec3, // distance between adjacent horizontal pixels, pointed right
-    pixel_delta_v: Vec3, // distance between adjacent vertical pixels, pointed down
+    image_height: u32,        // rendered image height
+    center: Point3,           // camera center
+    pixel00_loc: Point3,      // location of pixel (0,0)
+    pixel_delta_u: Vec3,      // distance between adjacent horizontal pixels, pointed right
+    pixel_delta_v: Vec3,      // distance between adjacent vertical pixels, pointed down
+    pixel_samples_scale: f64, // color scale factor for a sum of pixel samples
 }
 
 fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
@@ -31,14 +33,25 @@ fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
     return (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0);
 }
 
+fn sample_square() -> Vec3 {
+    // returns the vector to a random point in [-0.5,0.5] X [-0.5,0.5]
+    Vec3::new(
+        rand::random_range(0.0..=1.0) - 0.5,
+        rand::random_range(0.0..=1.0) - 0.5,
+        0.0,
+    )
+}
+
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: u32) -> Self {
+    pub fn new(aspect_ratio: f64, image_width: u32, samples_per_pixel: u32) -> Self {
         let raw_image_height = (image_width as f64 / aspect_ratio) as u32;
         let image_height = if raw_image_height > 1 {
             raw_image_height
         } else {
             1
         };
+
+        let pixel_samples_scale = 1.0 / samples_per_pixel as f64;
 
         let center = Point3::new(0.0, 0.0, 0.0);
 
@@ -63,11 +76,13 @@ impl Camera {
         Self {
             aspect_ratio,
             image_width,
+            samples_per_pixel,
             image_height,
             center,
             pixel00_loc,
             pixel_delta_u,
             pixel_delta_v,
+            pixel_samples_scale,
         }
     }
 
@@ -84,23 +99,38 @@ impl Camera {
             io::stderr().flush().expect("failed to flush");
 
             for i in 0..self.image_width {
-                let pixel_center = self.pixel00_loc
-                    + (i as f64 * self.pixel_delta_u)
-                    + (j as f64 * self.pixel_delta_v);
-                let ray_direction = pixel_center - self.center;
-                let r = Ray {
-                    origin: self.center,
-                    direction: ray_direction,
-                };
+                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
 
-                let pixel_color = ray_color(&r, world);
+                for _ in 0..self.samples_per_pixel {
+                    let r = self.get_ray(i, j);
+                    pixel_color += ray_color(&r, world);
+                }
 
-                write_color(&mut out, &pixel_color)?;
+                write_color(&mut out, &(self.pixel_samples_scale * pixel_color))?;
             }
         }
 
         eprint!("\rDone.                 \n");
 
         Ok(())
+    }
+
+    fn get_ray(&self, i: u32, j: u32) -> Ray {
+        // construct a camera ray originating from the origin
+        // and directed at randomly sampled points around the
+        // pixel location i,j
+
+        let offset = sample_square();
+        let pixel_sample = self.pixel00_loc
+            + ((i as f64 + offset.x) * self.pixel_delta_u)
+            + ((j as f64 + offset.y) * self.pixel_delta_v);
+
+        let ray_origin = self.center;
+        let ray_direction = pixel_sample - ray_origin;
+
+        Ray {
+            origin: ray_origin,
+            direction: ray_direction,
+        }
     }
 }
