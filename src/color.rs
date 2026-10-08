@@ -3,7 +3,7 @@ use std::{
     ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
-use crate::vec3::Vec3;
+use crate::{interval::Interval, vec3::Vec3};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Color {
@@ -107,9 +107,11 @@ impl From<Vec3> for Color {
 }
 
 pub fn write_color<W: Write>(out: &mut W, pixel_color: &Color) -> io::Result<()> {
-    let rbyte = (255.999 * pixel_color.r) as u8;
-    let gbyte = (255.999 * pixel_color.g) as u8;
-    let bbyte = (255.999 * pixel_color.b) as u8;
+    let intensity = Interval::new(0.0, 0.9999999999999999);
+
+    let rbyte = (255.0 * intensity.clamp(pixel_color.r)) as u8;
+    let gbyte = (255.0 * intensity.clamp(pixel_color.g)) as u8;
+    let bbyte = (255.0 * intensity.clamp(pixel_color.b)) as u8;
 
     writeln!(out, "{} {} {}", rbyte, gbyte, bbyte)
 }
