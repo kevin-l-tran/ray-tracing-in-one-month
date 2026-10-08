@@ -11,6 +11,7 @@ mod color;
 mod hittable;
 mod hittable_list;
 mod interval;
+mod material;
 mod ray;
 mod sphere;
 mod vec3;
@@ -21,6 +22,6 @@ fn main() -> io::Result<()> {
     world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
     world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
-    let cam = camera::Camera::new(16.0 / 9.0, 800, 10, 10);
+    let cam = camera::Camera::new(16.0 / 9.0, 800, 1000, 10);
     cam.render(&world)
 }

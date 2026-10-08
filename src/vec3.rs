@@ -49,6 +49,12 @@ impl Vec3 {
         }
     }
 
+    pub fn near_zero(&self) -> bool {
+        let threshold = 1e-8;
+
+        self.x.abs() < threshold && self.y.abs() < threshold && self.z.abs() < threshold
+    }
+
     pub fn length_squared(&self) -> f64 {
         self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
     }
