@@ -4,9 +4,15 @@ use crate::{
     vec3::{Point3, dot},
 };
 
-struct Sphere {
+pub struct Sphere {
     pub center: Point3,
     pub radius: f64,
+}
+
+impl Sphere {
+    pub fn new(center: Point3, radius: f64) -> Self {
+        Self { center, radius }
+    }
 }
 
 impl Hittable for Sphere {
@@ -18,6 +24,10 @@ impl Hittable for Sphere {
         let c = oc.length_squared() - self.radius * self.radius;
 
         let discriminant = h * h - a * c;
+        if discriminant < 0.0 {
+            return false;
+        }
+
         let sqrt_d = discriminant.sqrt();
 
         let mut root = (h - sqrt_d) / a;

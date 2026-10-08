@@ -3,6 +3,8 @@ use std::{
     ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
+use crate::vec3::Vec3;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Color {
     pub r: f64,
@@ -90,6 +92,16 @@ impl MulAssign<f64> for Color {
             r: self.r * num,
             g: self.g * num,
             b: self.b * num,
+        }
+    }
+}
+
+impl From<Vec3> for Color {
+    fn from(value: Vec3) -> Self {
+        Color {
+            r: value.x,
+            g: value.y,
+            b: value.z,
         }
     }
 }

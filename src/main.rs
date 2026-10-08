@@ -3,8 +3,11 @@ use std::io::Write;
 
 use crate::{
     color::{Color, write_color},
+    hittable::{HitRecord, Hittable},
+    hittable_list::HittableList,
     ray::Ray,
-    vec3::{Point3, Vec3, dot, unit_vector},
+    sphere::Sphere,
+    vec3::{Point3, Vec3, unit_vector},
 };
 
 mod color;
@@ -14,34 +17,16 @@ mod ray;
 mod sphere;
 mod vec3;
 
-fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
-    let oc = center - r.origin;
-
-    let a = dot(r.direction, r.direction);
-    let h = dot(r.direction, oc);
-    let c = oc.length_squared() - radius * radius;
-
-    let discriminant = h * h - a * c;
-
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (h - discriminant.sqrt()) / a
-    }
-}
-
-fn ray_color(r: &Ray) -> Color {
-    let t = hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, r);
-
-    if t > 0.0 {
-        let n = unit_vector(r.at(t) - Vec3::new(0.0, 0.0, -1.0));
-        return 0.5 * Color::new(n.x + 1.0, n.y + 1.0, n.z + 1.0);
+fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
+    let mut record = HitRecord::default();
+    if world.hit(r, 0.0, f64::INFINITY, &mut record) {
+        return 0.5 * (Color::from(record.normal) + Color::new(1.0, 1.0, 1.0));
     }
 
     let unit_direction = unit_vector(r.direction);
     let a = 0.5 * (unit_direction.y + 1.0);
 
-    (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
+    return (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0);
 }
 
 fn main() -> io::Result<()> {
@@ -60,6 +45,17 @@ fn main() -> io::Result<()> {
     } else {
         1
     };
+
+    /*
+     **********************
+     * WORLD
+     **********************
+     */
+
+    let mut world = HittableList::new();
+
+    world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
     /*
      **********************
@@ -110,7 +106,7 @@ fn main() -> io::Result<()> {
                 direction: ray_direction,
             };
 
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r, &world);
 
             write_color(&mut out, &pixel_color)?;
         }
