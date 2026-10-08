@@ -5,6 +5,7 @@ use crate::{
     color::{Color, write_color},
     hittable::{HitRecord, Hittable},
     hittable_list::HittableList,
+    interval::Interval,
     ray::Ray,
     sphere::Sphere,
     vec3::{Point3, Vec3, unit_vector},
@@ -13,13 +14,14 @@ use crate::{
 mod color;
 mod hittable;
 mod hittable_list;
+mod interval;
 mod ray;
 mod sphere;
 mod vec3;
 
 fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
     let mut record = HitRecord::default();
-    if world.hit(r, 0.0, f64::INFINITY, &mut record) {
+    if world.hit(r, Interval::new(0.0, f64::INFINITY), &mut record) {
         return 0.5 * (Color::from(record.normal) + Color::new(1.0, 1.0, 1.0));
     }
 
@@ -111,6 +113,8 @@ fn main() -> io::Result<()> {
             write_color(&mut out, &pixel_color)?;
         }
     }
+
+    eprint!("\n");
 
     Ok(())
 }

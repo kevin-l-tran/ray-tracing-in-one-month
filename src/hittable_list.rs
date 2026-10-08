@@ -1,5 +1,6 @@
 use crate::{
     hittable::{HitRecord, Hittable},
+    interval::Interval,
     ray::Ray,
 };
 
@@ -24,13 +25,13 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, r: &Ray, tmin: f64, tmax: f64, record: &mut HitRecord) -> bool {
+    fn hit(&self, r: &Ray, t: Interval, record: &mut HitRecord) -> bool {
         let mut temp_record = HitRecord::default();
         let mut hit_anything = false;
-        let mut closest_so_far = tmax;
+        let mut closest_so_far = t.max;
 
         for object in &self.objects {
-            if object.hit(r, tmin, closest_so_far, &mut temp_record) {
+            if object.hit(r, Interval::new(t.min, closest_so_far), &mut temp_record) {
                 hit_anything = true;
                 closest_so_far = temp_record.t;
                 *record = temp_record.clone();
