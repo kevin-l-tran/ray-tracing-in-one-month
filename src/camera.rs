@@ -29,8 +29,13 @@ fn ray_color(r: &Ray, depth: u32, world: &dyn Hittable) -> Color {
 
     let mut record = HitRecord::default();
 
+    // to prevent rays slightly offset to the sphere from intersecting it again,
+    // only consider rays that are at least t=0.001 away from the sphere
     if world.hit(r, Interval::new(0.001, f64::INFINITY), &mut record) {
-        let direction = Vec3::random_on_hemisphere(record.normal);
+        // for a unit sphere with center at `record.normal`,
+        // choose a random point on such unit sphere and bounce the ray
+        // in that direction
+        let direction = record.normal + Vec3::random_unit();
         return 0.5
             * ray_color(
                 &Ray {
