@@ -1,5 +1,5 @@
+use std::io;
 use std::io::Write;
-use std::{io};
 
 use crate::{
     color::{Color, write_color},
@@ -8,7 +8,9 @@ use crate::{
 };
 
 mod color;
+mod hittable;
 mod ray;
+mod sphere;
 mod vec3;
 
 fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
