@@ -10,7 +10,7 @@ struct Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(self, r: &Ray, tmin: f64, tmax: f64, record: &mut HitRecord) -> bool {
+    fn hit(&self, r: &Ray, tmin: f64, tmax: f64, record: &mut HitRecord) -> bool {
         let oc = self.center - r.origin;
 
         let a = dot(r.direction, r.direction);
