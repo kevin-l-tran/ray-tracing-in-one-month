@@ -1,4 +1,7 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use std::{
+    cmp::min,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Vec3 {
@@ -198,4 +201,12 @@ pub fn unit_vector(v: Vec3) -> Vec3 {
 
 pub fn reflect_vector(v: Vec3, normal: Vec3) -> Vec3 {
     v - 2.0 * dot(v, normal) * normal
+}
+
+pub fn refract_vector(uv: Vec3, normal: Vec3, relative_refraction: f64) -> Vec3 {
+    let cos_theta = f64::min(dot(-1.0 * uv, normal), 1.0);
+    let r_perpendicular = relative_refraction * (uv + cos_theta * normal);
+    let r_parallel = -1.0 * (1.0 - r_perpendicular.length_squared()).abs().sqrt() * normal;
+
+    r_perpendicular + r_parallel
 }
