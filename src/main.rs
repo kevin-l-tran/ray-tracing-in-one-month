@@ -53,6 +53,6 @@ fn main() -> io::Result<()> {
         material_bubble,
     )));
 
-    let cam = camera::Camera::new(16.0 / 9.0, 400, 20, 10);
+    let cam = camera::Camera::new(16.0 / 9.0, 90.0, 400, 20, 10);
     cam.render(&world)
 }

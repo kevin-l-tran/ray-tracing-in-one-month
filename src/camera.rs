@@ -10,6 +10,7 @@ use crate::{
 
 pub struct Camera {
     pub aspect_ratio: f64,      // ratio of image height over width
+    pub vfov: f64,              // vertical view angle (field of view)
     pub image_width: u32,       // rendered image width in pixel count
     pub samples_per_pixel: u32, // number of random samples per pixel
     pub max_depth: u32,         // max number of ray bounces into scene
@@ -66,6 +67,7 @@ fn sample_square() -> Vec3 {
 impl Camera {
     pub fn new(
         aspect_ratio: f64,
+        vfov: f64,
         image_width: u32,
         samples_per_pixel: u32,
         max_depth: u32,
@@ -83,7 +85,9 @@ impl Camera {
 
         // determine viewport dimensions
         let focal_length = 1.0;
-        let viewport_height = 2.0;
+        let theta = vfov * (2.0 * std::f64::consts::PI / 360.0);
+        let h = f64::tan(theta / 2.0);
+        let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * (image_width as f64) / (image_height as f64);
 
         // calculate the vectors across the horizontal and down the vertical viewport edges
@@ -101,6 +105,7 @@ impl Camera {
 
         Self {
             aspect_ratio,
+            vfov,
             image_width,
             samples_per_pixel,
             max_depth,
