@@ -1,7 +1,10 @@
 use std::rc::Rc;
 
 use crate::{
-    interval::Interval, material::Material, ray::Ray, vec3::{Point3, Vec3, dot},
+    interval::Interval,
+    material::Material,
+    ray::Ray,
+    vec3::{Point3, Vec3, dot},
 };
 
 #[derive(Clone, Default)]

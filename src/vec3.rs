@@ -195,3 +195,7 @@ pub fn cross(v1: Vec3, v2: Vec3) -> Vec3 {
 pub fn unit_vector(v: Vec3) -> Vec3 {
     v.normalize()
 }
+
+pub fn reflect_vector(v: Vec3, normal: Vec3) -> Vec3 {
+    v - 2.0 * dot(v, normal) * normal
+}

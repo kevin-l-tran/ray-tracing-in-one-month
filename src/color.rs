@@ -5,7 +5,7 @@ use std::{
 
 use crate::{interval::Interval, vec3::Vec3};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Color {
     pub r: f64,
     pub g: f64,
@@ -62,6 +62,18 @@ impl SubAssign for Color {
     }
 }
 
+impl Mul for Color {
+    type Output = Color;
+
+    fn mul(self, rhs: Color) -> Color {
+        Self {
+            r: self.r * rhs.r,
+            g: self.g * rhs.g,
+            b: self.b * rhs.b,
+        }
+    }
+}
+
 impl Mul<Color> for f64 {
     type Output = Color;
 
@@ -82,6 +94,16 @@ impl Mul<f64> for Color {
             r: self.r * num,
             g: self.g * num,
             b: self.b * num,
+        }
+    }
+}
+
+impl MulAssign for Color {
+    fn mul_assign(&mut self, rhs: Color) {
+        *self = Self {
+            r: self.r * rhs.r,
+            g: self.g * rhs.g,
+            b: self.b * rhs.b,
         }
     }
 }

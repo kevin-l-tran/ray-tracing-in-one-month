@@ -35,16 +35,17 @@ fn ray_color(r: &Ray, depth: u32, world: &dyn Hittable) -> Color {
         // for a unit sphere with center at `record.normal`,
         // choose a random point on such unit sphere and bounce the ray
         // in that direction
-        let direction = record.normal + Vec3::random_unit();
-        return 0.5
-            * ray_color(
-                &Ray {
-                    origin: record.p,
-                    direction,
-                },
-                depth - 1,
-                world,
-            );
+        let mut scattered = Ray::default();
+        let mut attenuation = Color::default();
+
+        if let Some(material) = record.material.as_ref() {
+            if material.scatter(r, &record, &mut attenuation, &mut scattered) {
+                // component-wise multiply attenuation vector against ray color vector
+                return attenuation * ray_color(&scattered, depth - 1, world);
+            }
+        }
+
+        return Color::new(0.0, 0.0, 0.0);
     }
 
     let unit_direction = unit_vector(r.direction);
